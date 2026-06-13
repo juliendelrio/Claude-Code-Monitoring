@@ -33,15 +33,15 @@
 
     { "id": 10, "type": "row", "title": "A/B testing — réduction de tokens", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 } },
     {
-      "id": 11, "type": "timeseries", "title": "Coût cumulé par expérience",
+      "id": 11, "type": "timeseries", "title": "Coût par expérience (par intervalle)",
       "fieldConfig": { "defaults": { "unit": "currencyUSD" } },
-      "targets": [ { "expr": "sum(claude_code_cost_usage_USD_total) by (experiment)", "legendFormat": "{{experiment}}", "refId": "A" } ],
+      "targets": [ { "expr": "sum(increase(claude_code_cost_usage_USD_total[$__rate_interval])) by (experiment)", "legendFormat": "{{experiment}}", "refId": "A" } ],
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 }
     },
     {
-      "id": 12, "type": "timeseries", "title": "Tokens cumulés par expérience",
+      "id": 12, "type": "timeseries", "title": "Tokens par expérience (par intervalle)",
       "fieldConfig": { "defaults": { "unit": "short" } },
-      "targets": [ { "expr": "sum(claude_code_token_usage_tokens_total) by (experiment)", "legendFormat": "{{experiment}}", "refId": "A" } ],
+      "targets": [ { "expr": "sum(increase(claude_code_token_usage_tokens_total[$__rate_interval])) by (experiment)", "legendFormat": "{{experiment}}", "refId": "A" } ],
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 }
     },
     {
@@ -90,9 +90,9 @@
 
     { "id": 30, "type": "row", "title": "Productivité & qualité", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 37 } },
     {
-      "id": 31, "type": "timeseries", "title": "Lignes de code (cumulé)",
+      "id": 31, "type": "timeseries", "title": "Lignes de code (par intervalle)",
       "fieldConfig": { "defaults": { "unit": "short" } },
-      "targets": [ { "expr": "sum(claude_code_lines_of_code_count_total) by (type)", "legendFormat": "{{type}}", "refId": "A" } ],
+      "targets": [ { "expr": "sum(increase(claude_code_lines_of_code_count_total[$__rate_interval])) by (type)", "legendFormat": "{{type}}", "refId": "A" } ],
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 38 }
     },
     {
