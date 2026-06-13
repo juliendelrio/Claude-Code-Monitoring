@@ -29,7 +29,11 @@ All deployment files live in [src/](src/):
 - Run docker compose from the `src/` directory (where `compose.yaml` and `.env` live).
 - **Secrets** go only in `src/.env` (gitignored). Never hardcode credentials; reference
   them via `${VAR}` in `compose.yaml` and document new vars in `src/.env.example`.
-- The stack assumes an external Traefik on a Docker network named `web` (TLS + Let's Encrypt).
+- **No instance-specific values in `compose.yaml`**: hostnames (`OTEL_HOST`, `GRAFANA_HOST`),
+  Traefik network (`TRAEFIK_NETWORK`) and cert resolver (`TRAEFIK_CERTRESOLVER`) all come
+  from `.env`. Keep it host-agnostic — if you add a new instance-specific value, externalize it.
+- The stack assumes an external Traefik on a Docker network (default `web`, TLS via the
+  configured cert resolver, default `letsencrypt`).
 - Prometheus/Grafana state lives in named docker volumes (`prometheus-data`, `grafana-data`),
   not in the repo.
 

@@ -14,11 +14,11 @@ Claude Code ──(OTLP/gRPC :4317)──▶ otel-collector ──(Prometheus ex
 prometheus (scrape every 10s, 90-day retention) ──▶ grafana (provisioned dashboard)
 ```
 
-| Service          | Role                                                        | Exposed at                          |
-|------------------|-------------------------------------------------------------|-------------------------------------|
-| `otel-collector` | Receives OTLP/gRPC, re-exposes metrics in Prometheus format | `otel.tools.juliendelrio.fr` (TLS + basicauth) |
-| `prometheus`     | Scrapes the collector, stores time series (90d retention)   | internal only                       |
-| `grafana`        | Displays the auto-provisioned dashboard                     | `tokens.tools.juliendelrio.fr` (TLS) |
+| Service          | Role                                                        | Exposed at                     |
+|------------------|-------------------------------------------------------------|--------------------------------|
+| `otel-collector` | Receives OTLP/gRPC, re-exposes metrics in Prometheus format | `$OTEL_HOST` (TLS + basicauth) |
+| `prometheus`     | Scrapes the collector, stores time series (90d retention)   | internal only                  |
+| `grafana`        | Displays the auto-provisioned dashboards                    | `$GRAFANA_HOST` (TLS)          |
 
 The dashboards live in [src/dashboards/](src/dashboards/), grouped under a
 "Claude Code" folder in Grafana and cross-linked via a dropdown:
@@ -34,15 +34,18 @@ whole view (e.g. to compare experiments).
 ## Prerequisites
 
 - Docker + Docker Compose v2
-- An existing **Traefik** reverse proxy attached to an external Docker network
-  named `web`, with a `letsencrypt` certificate resolver configured.
-- DNS records pointing `otel.tools.juliendelrio.fr` and
-  `tokens.tools.juliendelrio.fr` to the host (adjust the hostnames in
-  [src/compose.yaml](src/compose.yaml) for your own domain).
+- An existing **Traefik** reverse proxy attached to an external Docker network,
+  with a certificate resolver configured (defaults assume a network named `web`
+  and a `letsencrypt` resolver — both overridable via `.env`).
+- DNS records pointing your chosen `OTEL_HOST` and `GRAFANA_HOST` to the host.
+
+The stack is host-agnostic: everything instance-specific (hostnames, Traefik
+network and cert resolver) is set through environment variables, so the same
+`compose.yaml` works for any deployment.
 
 ## Setup
 
-1. Configure secrets:
+1. Create your config:
 
    ```bash
    cd src
@@ -51,10 +54,14 @@ whole view (e.g. to compare experiments).
 
    Then edit `.env`:
 
-   - `OTEL_AUTH_USERS` — Traefik basicauth credentials protecting the collector
-     endpoint. Generate with `htpasswd -nb user password` and **escape every `$`
-     as `$$`** so docker compose doesn't interpolate it.
-   - `GRAFANA_ADMIN_PASSWORD` — admin password for Grafana (login user: `admin`).
+   | Variable                | Required | Description                                                                 |
+   |-------------------------|----------|-----------------------------------------------------------------------------|
+   | `OTEL_HOST`             | yes      | Public hostname for the OTLP collector (Claude Code sends metrics here).     |
+   | `GRAFANA_HOST`          | yes      | Public hostname for the Grafana UI.                                         |
+   | `TRAEFIK_NETWORK`       | no       | External Docker network Traefik is on. Default: `web`.                       |
+   | `TRAEFIK_CERTRESOLVER`  | no       | Traefik certificate resolver name. Default: `letsencrypt`.                   |
+   | `OTEL_AUTH_USERS`       | yes      | Traefik basicauth protecting the collector. Generate with `htpasswd -nb user password`; **escape every `$` as `$$`**. |
+   | `GRAFANA_ADMIN_PASSWORD`| yes      | Grafana admin password (login user: `admin`).                              |
 
 2. Start the stack (from `src/`):
 
@@ -62,8 +69,8 @@ whole view (e.g. to compare experiments).
    docker compose up -d
    ```
 
-3. Open `https://tokens.tools.juliendelrio.fr` and log in to Grafana. The
-   datasource and dashboard are provisioned automatically.
+3. Open `https://$GRAFANA_HOST` and log in to Grafana. The datasource and
+   dashboards are provisioned automatically.
 
 ## Point Claude Code at the collector
 
@@ -74,7 +81,7 @@ collector endpoint, for example:
 export CLAUDE_CODE_ENABLE_TELEMETRY=1
 export OTEL_METRICS_EXPORTER=otlp
 export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
-export OTEL_EXPORTER_OTLP_ENDPOINT=https://otel.tools.juliendelrio.fr
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://$OTEL_HOST
 export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic <base64 user:password>"
 ```
 
