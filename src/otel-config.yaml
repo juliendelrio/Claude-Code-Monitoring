@@ -3,13 +3,25 @@ receivers:
     protocols:
       grpc:
         endpoint: 0.0.0.0:4317
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 400
+    spike_limit_mib: 100
+  batch:
+    timeout: 10s
 exporters:
   prometheus:
     endpoint: "0.0.0.0:8889"
     send_timestamps: true
     metric_expiration: 24h
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
 service:
+  extensions: [health_check]
   pipelines:
     metrics:
       receivers: [otlp]
+      processors: [memory_limiter, batch]
       exporters: [prometheus]

@@ -3,6 +3,6 @@ providers:
   - name: 'Claude Code'
     folder: ''
     type: file
-    disableDeletion: false
+    disableDeletion: true
     options:
       path: /etc/grafana/provisioning/dashboards
