@@ -1,0 +1,65 @@
+version: '3.8'
+
+networks:
+  web:
+    external: true
+  default:
+
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      # On monte le fichier local dans le conteneur
+      - ./otel-config.yaml:/etc/otelcol/config.yaml:ro
+    restart: unless-stopped
+    networks:
+      - default
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.otel.rule=Host(`otel.tools.juliendelrio.fr`)"
+      - "traefik.http.services.otel.loadbalancer.server.scheme=h2c"
+      - "traefik.http.services.otel.loadbalancer.server.port=4317"
+      - "traefik.http.routers.otel.tls=true"
+      - "traefik.http.routers.otel.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.otel-auth.basicauth.users=${OTEL_AUTH_USERS}"
+      - "traefik.http.routers.otel.middlewares=otel-auth"
+
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=90d'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    restart: unless-stopped
+    networks:
+      - default
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+    volumes:
+      - ./datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro
+      - ./dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ./claude-code-tokens.json:/etc/grafana/provisioning/dashboards/claude-code-tokens.json:ro
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+    networks:
+      - default
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana-tokens.rule=Host(`tokens.tools.juliendelrio.fr`)"
+      - "traefik.http.services.grafana-tokens.loadbalancer.server.port=3000"
+      - "traefik.http.routers.grafana-tokens.tls=true"
+      - "traefik.http.routers.grafana-tokens.tls.certresolver=letsencrypt"
+
+volumes:
+  prometheus-data:
+  grafana-data:

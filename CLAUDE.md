@@ -1,0 +1,44 @@
+# CLAUDE.md
+
+Guidance for Claude Code when working in this repository.
+
+## Project
+
+Docker monitoring stack for **Claude Code usage telemetry**. Claude Code emits
+OpenTelemetry metrics (OTLP/gRPC); this stack collects, stores and visualizes
+them in Grafana, exposed behind an existing Traefik reverse proxy with TLS.
+
+## Architecture
+
+```
+Claude Code --(OTLP/gRPC :4317)--> otel-collector --(Prometheus exporter :8889)-->
+prometheus (scrape 10s, 90d retention) --> grafana (provisioned dashboard)
+```
+
+All deployment files live in [src/](src/):
+
+- [src/compose.yaml](src/compose.yaml) — service definitions (otel-collector, prometheus, grafana) + Traefik labels
+- [src/otel-config.yaml](src/otel-config.yaml) — OTLP receiver + Prometheus exporter pipeline
+- [src/prometheus.yml](src/prometheus.yml) — scrape config targeting the collector
+- [src/datasource.yml](src/datasource.yml) — Grafana Prometheus datasource (auto-provisioned)
+- [src/dashboards.yml](src/dashboards.yml) — Grafana dashboard provider (auto-provisioned)
+- [src/claude-code-tokens.json](src/claude-code-tokens.json) — the dashboard (cost, tokens, sessions, productivity)
+
+## Conventions
+
+- Run docker compose from the `src/` directory (where `compose.yaml` and `.env` live).
+- **Secrets** go only in `src/.env` (gitignored). Never hardcode credentials; reference
+  them via `${VAR}` in `compose.yaml` and document new vars in `src/.env.example`.
+- The stack assumes an external Traefik on a Docker network named `web` (TLS + Let's Encrypt).
+- Prometheus/Grafana state lives in named docker volumes (`prometheus-data`, `grafana-data`),
+  not in the repo.
+
+## Common commands
+
+```bash
+# from src/
+docker compose up -d
+docker compose logs -f otel-collector
+docker compose down
+docker compose config        # validate compose + env interpolation
+```

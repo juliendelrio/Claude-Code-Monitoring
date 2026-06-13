@@ -1,0 +1,119 @@
+{
+  "title": "Claude Code — Suivi complet",
+  "uid": "claude-code-full",
+  "schemaVersion": 38,
+  "refresh": "30s",
+  "time": { "from": "now-24h", "to": "now" },
+  "panels": [
+    { "id": 1, "type": "row", "title": "Vue d'ensemble", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 } },
+    {
+      "id": 2, "type": "stat", "title": "Coût total (USD)",
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 2 } },
+      "targets": [ { "expr": "sum(claude_code_cost_usage_USD_total)", "refId": "A" } ],
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 }
+    },
+    {
+      "id": 3, "type": "stat", "title": "Tokens totaux",
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "targets": [ { "expr": "sum(claude_code_token_usage_tokens_total)", "refId": "A" } ],
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 }
+    },
+    {
+      "id": 4, "type": "stat", "title": "Sessions",
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "targets": [ { "expr": "sum(claude_code_session_count_total)", "refId": "A" } ],
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 }
+    },
+    {
+      "id": 5, "type": "stat", "title": "Temps actif (h)",
+      "fieldConfig": { "defaults": { "unit": "h", "decimals": 2 } },
+      "targets": [ { "expr": "sum(claude_code_active_time_seconds_total) / 3600", "refId": "A" } ],
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 }
+    },
+
+    { "id": 10, "type": "row", "title": "A/B testing — réduction de tokens", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 } },
+    {
+      "id": 11, "type": "timeseries", "title": "Coût cumulé par expérience",
+      "fieldConfig": { "defaults": { "unit": "currencyUSD" } },
+      "targets": [ { "expr": "sum(claude_code_cost_usage_USD_total) by (experiment)", "legendFormat": "{{experiment}}", "refId": "A" } ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 }
+    },
+    {
+      "id": 12, "type": "timeseries", "title": "Tokens cumulés par expérience",
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "targets": [ { "expr": "sum(claude_code_token_usage_tokens_total) by (experiment)", "legendFormat": "{{experiment}}", "refId": "A" } ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 }
+    },
+    {
+      "id": 13, "type": "gauge", "title": "Part des tokens servis par le cache",
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 } },
+      "targets": [ { "expr": "sum(claude_code_token_usage_tokens_total{type=\"cacheRead\"}) / sum(claude_code_token_usage_tokens_total{type=~\"input|cacheRead|cacheCreation\"})", "refId": "A" } ],
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 14 }
+    },
+    {
+      "id": 14, "type": "stat", "title": "Coût moyen / session",
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 3 } },
+      "targets": [ { "expr": "sum(claude_code_cost_usage_USD_total) / sum(claude_code_session_count_total)", "refId": "A" } ],
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 14 }
+    },
+    {
+      "id": 15, "type": "stat", "title": "Coût moyen / commit",
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 3 } },
+      "targets": [ { "expr": "sum(claude_code_cost_usage_USD_total) / sum(claude_code_commit_count_total)", "refId": "A" } ],
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 14 }
+    },
+
+    { "id": 20, "type": "row", "title": "Consommation détaillée", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 20 } },
+    {
+      "id": 21, "type": "timeseries", "title": "Tokens / min par type",
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "targets": [ { "expr": "sum(rate(claude_code_token_usage_tokens_total[5m])) by (type) * 60", "legendFormat": "{{type}}", "refId": "A" } ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 21 }
+    },
+    {
+      "id": 22, "type": "piechart", "title": "Coût par modèle",
+      "fieldConfig": { "defaults": { "unit": "currencyUSD" } },
+      "targets": [ { "expr": "sum(claude_code_cost_usage_USD_total) by (model)", "legendFormat": "{{model}}", "refId": "A" } ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 21 }
+    },
+    {
+      "id": 23, "type": "timeseries", "title": "Tokens / min par source (main / subagent / auxiliary)",
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "targets": [ { "expr": "sum(rate(claude_code_token_usage_tokens_total[5m])) by (query_source) * 60", "legendFormat": "{{query_source}}", "refId": "A" } ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 29 }
+    },
+    {
+      "id": 24, "type": "table", "title": "Détail tokens par type & modèle",
+      "targets": [ { "expr": "sum(claude_code_token_usage_tokens_total) by (type, model)", "format": "table", "instant": true, "refId": "A" } ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 29 }
+    },
+
+    { "id": 30, "type": "row", "title": "Productivité & qualité", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 37 } },
+    {
+      "id": 31, "type": "timeseries", "title": "Lignes de code (cumulé)",
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "targets": [ { "expr": "sum(claude_code_lines_of_code_count_total) by (type)", "legendFormat": "{{type}}", "refId": "A" } ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 38 }
+    },
+    {
+      "id": 32, "type": "gauge", "title": "Taux d'acceptation des edits",
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 } },
+      "targets": [ { "expr": "sum(claude_code_code_edit_tool_decision_total{decision=\"accept\"}) / sum(claude_code_code_edit_tool_decision_total)", "refId": "A" } ],
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 38 }
+    },
+    {
+      "id": 33, "type": "stat", "title": "Commits / Pull Requests",
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "targets": [
+        { "expr": "sum(claude_code_commit_count_total)", "legendFormat": "Commits", "refId": "A" },
+        { "expr": "sum(claude_code_pull_request_count_total)", "legendFormat": "PR", "refId": "B" }
+      ],
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 38 }
+    },
+    {
+      "id": 34, "type": "table", "title": "Décisions d'edit par langage",
+      "targets": [ { "expr": "sum(claude_code_code_edit_tool_decision_total) by (language, decision)", "format": "table", "instant": true, "refId": "A" } ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 46 }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+# Environment / secrets
+.env
+*.env
+!.env.example
+
+# Grafana / Prometheus persisted data (managed by named docker volumes, never commit local copies)
+grafana-data/
+prometheus-data/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
