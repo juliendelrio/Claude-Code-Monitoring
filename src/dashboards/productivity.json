@@ -1,0 +1,49 @@
+{
+  "title": "Claude Code — Productivité & qualité",
+  "uid": "claude-code-productivity",
+  "tags": ["claude-code"],
+  "schemaVersion": 38,
+  "refresh": "30s",
+  "time": { "from": "now-24h", "to": "now" },
+  "links": [
+    { "type": "dashboards", "title": "Claude Code", "tags": ["claude-code"], "asDropdown": true, "includeVars": true, "keepTime": true }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "experiment", "label": "Expérience", "type": "query",
+        "query": { "query": "label_values(claude_code_cost_usage_USD_total, experiment)", "refId": "experiment" },
+        "includeAll": true, "multi": true, "allValue": ".*", "current": { "text": "All", "value": "$__all" },
+        "refresh": 2, "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 31, "type": "timeseries", "title": "Lignes de code (par intervalle)",
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "targets": [ { "expr": "sum(increase(claude_code_lines_of_code_count_total{experiment=~\"$experiment\"}[$__rate_interval])) by (type)", "legendFormat": "{{type}}", "refId": "A" } ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+    },
+    {
+      "id": 32, "type": "gauge", "title": "Taux d'acceptation des edits",
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 } },
+      "targets": [ { "expr": "sum(claude_code_code_edit_tool_decision_total{decision=\"accept\", experiment=~\"$experiment\"}) / clamp_min(sum(claude_code_code_edit_tool_decision_total{experiment=~\"$experiment\"}), 1)", "refId": "A" } ],
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 }
+    },
+    {
+      "id": 33, "type": "stat", "title": "Commits / Pull Requests",
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "targets": [
+        { "expr": "sum(claude_code_commit_count_total{experiment=~\"$experiment\"})", "legendFormat": "Commits", "refId": "A" },
+        { "expr": "sum(claude_code_pull_request_count_total{experiment=~\"$experiment\"})", "legendFormat": "PR", "refId": "B" }
+      ],
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 }
+    },
+    {
+      "id": 34, "type": "table", "title": "Décisions d'edit par langage",
+      "targets": [ { "expr": "sum(claude_code_code_edit_tool_decision_total{experiment=~\"$experiment\"}) by (language, decision)", "format": "table", "instant": true, "refId": "A" } ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+    }
+  ]
+}

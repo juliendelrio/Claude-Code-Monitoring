@@ -21,8 +21,8 @@ All deployment files live in [src/](src/):
 - [src/otel-config.yaml](src/otel-config.yaml) — OTLP receiver + Prometheus exporter pipeline
 - [src/prometheus.yml](src/prometheus.yml) — scrape config targeting the collector
 - [src/datasource.yml](src/datasource.yml) — Grafana Prometheus datasource (auto-provisioned)
-- [src/dashboards.yml](src/dashboards.yml) — Grafana dashboard provider (auto-provisioned)
-- [src/claude-code-tokens.json](src/claude-code-tokens.json) — the dashboard (cost, tokens, sessions, productivity)
+- [src/dashboards.yml](src/dashboards.yml) — Grafana dashboard provider (auto-provisioned, points at src/dashboards/)
+- [src/dashboards/](src/dashboards/) — one JSON per themed dashboard (overview, A/B testing, consumption, productivity), grouped under a "Claude Code" folder in Grafana
 
 ## Conventions
 

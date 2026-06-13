@@ -68,7 +68,7 @@ services:
     volumes:
       - ./datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro
       - ./dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
-      - ./claude-code-tokens.json:/etc/grafana/provisioning/dashboards/claude-code-tokens.json:ro
+      - ./dashboards:/etc/grafana/provisioning/dashboards/claude-code:ro
       - grafana-data:/var/lib/grafana
     restart: unless-stopped
     mem_limit: 512m

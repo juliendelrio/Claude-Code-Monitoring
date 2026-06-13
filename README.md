@@ -20,10 +20,16 @@ prometheus (scrape every 10s, 90-day retention) ──▶ grafana (provisioned d
 | `prometheus`     | Scrapes the collector, stores time series (90d retention)   | internal only                       |
 | `grafana`        | Displays the auto-provisioned dashboard                     | `tokens.tools.juliendelrio.fr` (TLS) |
 
-The Grafana dashboard ([src/claude-code-tokens.json](src/claude-code-tokens.json))
-covers an overview (total cost, tokens, sessions, active time), A/B experiment
-comparison with cache-hit ratio, detailed consumption by type / model / source,
-and productivity metrics (lines of code, edit acceptance rate, commits / PRs).
+The dashboards live in [src/dashboards/](src/dashboards/), grouped under a
+"Claude Code" folder in Grafana and cross-linked via a dropdown:
+
+- **Vue d'ensemble** — cost, tokens, sessions, active time, cache-hit ratio, avg cost per session / commit
+- **A/B testing** — cost & tokens per experiment over time, cache ratio, cost per session / commit
+- **Consommation** — tokens by type and query source, cost by model, detailed token table
+- **Productivité & qualité** — lines of code, edit acceptance rate, commits / PRs, edit decisions by language
+
+Each dashboard has `$model` and `$experiment` template variables to filter the
+whole view (e.g. to compare experiments).
 
 ## Prerequisites
 

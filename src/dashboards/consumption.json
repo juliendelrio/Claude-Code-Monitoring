@@ -1,0 +1,52 @@
+{
+  "title": "Claude Code — Consommation",
+  "uid": "claude-code-consumption",
+  "tags": ["claude-code"],
+  "schemaVersion": 38,
+  "refresh": "30s",
+  "time": { "from": "now-24h", "to": "now" },
+  "links": [
+    { "type": "dashboards", "title": "Claude Code", "tags": ["claude-code"], "asDropdown": true, "includeVars": true, "keepTime": true }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "model", "label": "Modèle", "type": "query",
+        "query": { "query": "label_values(claude_code_cost_usage_USD_total, model)", "refId": "model" },
+        "includeAll": true, "multi": true, "allValue": ".*", "current": { "text": "All", "value": "$__all" },
+        "refresh": 2, "sort": 1
+      },
+      {
+        "name": "experiment", "label": "Expérience", "type": "query",
+        "query": { "query": "label_values(claude_code_cost_usage_USD_total, experiment)", "refId": "experiment" },
+        "includeAll": true, "multi": true, "allValue": ".*", "current": { "text": "All", "value": "$__all" },
+        "refresh": 2, "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 21, "type": "timeseries", "title": "Tokens / min par type",
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "targets": [ { "expr": "sum(rate(claude_code_token_usage_tokens_total{model=~\"$model\", experiment=~\"$experiment\"}[$__rate_interval])) by (type) * 60", "legendFormat": "{{type}}", "refId": "A" } ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+    },
+    {
+      "id": 22, "type": "piechart", "title": "Coût par modèle",
+      "fieldConfig": { "defaults": { "unit": "currencyUSD" } },
+      "targets": [ { "expr": "sum(claude_code_cost_usage_USD_total{model=~\"$model\", experiment=~\"$experiment\"}) by (model)", "legendFormat": "{{model}}", "refId": "A" } ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+    },
+    {
+      "id": 23, "type": "timeseries", "title": "Tokens / min par source (main / subagent / auxiliary)",
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "targets": [ { "expr": "sum(rate(claude_code_token_usage_tokens_total{model=~\"$model\", experiment=~\"$experiment\"}[$__rate_interval])) by (query_source) * 60", "legendFormat": "{{query_source}}", "refId": "A" } ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+    },
+    {
+      "id": 24, "type": "table", "title": "Détail tokens par type & modèle",
+      "targets": [ { "expr": "sum(claude_code_token_usage_tokens_total{model=~\"$model\", experiment=~\"$experiment\"}) by (type, model)", "format": "table", "instant": true, "refId": "A" } ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+    }
+  ]
+}

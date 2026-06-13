@@ -1,8 +1,10 @@
 apiVersion: 1
 providers:
   - name: 'Claude Code'
-    folder: ''
+    folder: 'Claude Code'
     type: file
     disableDeletion: true
+    allowUiUpdates: false
     options:
-      path: /etc/grafana/provisioning/dashboards
+      path: /etc/grafana/provisioning/dashboards/claude-code
+      foldersFromFilesStructure: false

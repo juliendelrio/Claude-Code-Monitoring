@@ -1,0 +1,71 @@
+{
+  "title": "Claude Code — Vue d'ensemble",
+  "uid": "claude-code-overview",
+  "tags": ["claude-code"],
+  "schemaVersion": 38,
+  "refresh": "30s",
+  "time": { "from": "now-24h", "to": "now" },
+  "links": [
+    { "type": "dashboards", "title": "Claude Code", "tags": ["claude-code"], "asDropdown": true, "includeVars": true, "keepTime": true }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "model", "label": "Modèle", "type": "query",
+        "query": { "query": "label_values(claude_code_cost_usage_USD_total, model)", "refId": "model" },
+        "includeAll": true, "multi": true, "allValue": ".*", "current": { "text": "All", "value": "$__all" },
+        "refresh": 2, "sort": 1
+      },
+      {
+        "name": "experiment", "label": "Expérience", "type": "query",
+        "query": { "query": "label_values(claude_code_cost_usage_USD_total, experiment)", "refId": "experiment" },
+        "includeAll": true, "multi": true, "allValue": ".*", "current": { "text": "All", "value": "$__all" },
+        "refresh": 2, "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 2, "type": "stat", "title": "Coût sur la période (USD)",
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 2 } },
+      "targets": [ { "expr": "sum(increase(claude_code_cost_usage_USD_total{model=~\"$model\", experiment=~\"$experiment\"}[$__range]))", "refId": "A" } ],
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 }
+    },
+    {
+      "id": 3, "type": "stat", "title": "Tokens sur la période",
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "targets": [ { "expr": "sum(increase(claude_code_token_usage_tokens_total{model=~\"$model\", experiment=~\"$experiment\"}[$__range]))", "refId": "A" } ],
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 }
+    },
+    {
+      "id": 4, "type": "stat", "title": "Sessions sur la période",
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "targets": [ { "expr": "sum(increase(claude_code_session_count_total{experiment=~\"$experiment\"}[$__range]))", "refId": "A" } ],
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 }
+    },
+    {
+      "id": 5, "type": "stat", "title": "Temps actif sur la période (h)",
+      "fieldConfig": { "defaults": { "unit": "h", "decimals": 2 } },
+      "targets": [ { "expr": "sum(increase(claude_code_active_time_seconds_total{experiment=~\"$experiment\"}[$__range])) / 3600", "refId": "A" } ],
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 }
+    },
+    {
+      "id": 13, "type": "gauge", "title": "Part des tokens servis par le cache",
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 } },
+      "targets": [ { "expr": "sum(claude_code_token_usage_tokens_total{type=\"cacheRead\", model=~\"$model\", experiment=~\"$experiment\"}) / clamp_min(sum(claude_code_token_usage_tokens_total{type=~\"input|cacheRead|cacheCreation\", model=~\"$model\", experiment=~\"$experiment\"}), 1)", "refId": "A" } ],
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 4 }
+    },
+    {
+      "id": 14, "type": "stat", "title": "Coût moyen / session",
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 3 } },
+      "targets": [ { "expr": "sum(claude_code_cost_usage_USD_total{experiment=~\"$experiment\"}) / clamp_min(sum(claude_code_session_count_total{experiment=~\"$experiment\"}), 1)", "refId": "A" } ],
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 4 }
+    },
+    {
+      "id": 15, "type": "stat", "title": "Coût moyen / commit",
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 3 } },
+      "targets": [ { "expr": "sum(claude_code_cost_usage_USD_total{experiment=~\"$experiment\"}) / clamp_min(sum(claude_code_commit_count_total{experiment=~\"$experiment\"}), 1)", "refId": "A" } ],
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 4 }
+    }
+  ]
+}
