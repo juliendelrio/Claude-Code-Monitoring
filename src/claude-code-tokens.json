@@ -47,19 +47,19 @@
     {
       "id": 13, "type": "gauge", "title": "Part des tokens servis par le cache",
       "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 } },
-      "targets": [ { "expr": "sum(claude_code_token_usage_tokens_total{type=\"cacheRead\"}) / sum(claude_code_token_usage_tokens_total{type=~\"input|cacheRead|cacheCreation\"})", "refId": "A" } ],
+      "targets": [ { "expr": "sum(claude_code_token_usage_tokens_total{type=\"cacheRead\"}) / clamp_min(sum(claude_code_token_usage_tokens_total{type=~\"input|cacheRead|cacheCreation\"}), 1)", "refId": "A" } ],
       "gridPos": { "h": 6, "w": 8, "x": 0, "y": 14 }
     },
     {
       "id": 14, "type": "stat", "title": "Coût moyen / session",
       "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 3 } },
-      "targets": [ { "expr": "sum(claude_code_cost_usage_USD_total) / sum(claude_code_session_count_total)", "refId": "A" } ],
+      "targets": [ { "expr": "sum(claude_code_cost_usage_USD_total) / clamp_min(sum(claude_code_session_count_total), 1)", "refId": "A" } ],
       "gridPos": { "h": 6, "w": 8, "x": 8, "y": 14 }
     },
     {
       "id": 15, "type": "stat", "title": "Coût moyen / commit",
       "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 3 } },
-      "targets": [ { "expr": "sum(claude_code_cost_usage_USD_total) / sum(claude_code_commit_count_total)", "refId": "A" } ],
+      "targets": [ { "expr": "sum(claude_code_cost_usage_USD_total) / clamp_min(sum(claude_code_commit_count_total), 1)", "refId": "A" } ],
       "gridPos": { "h": 6, "w": 8, "x": 16, "y": 14 }
     },
 
@@ -98,7 +98,7 @@
     {
       "id": 32, "type": "gauge", "title": "Taux d'acceptation des edits",
       "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 } },
-      "targets": [ { "expr": "sum(claude_code_code_edit_tool_decision_total{decision=\"accept\"}) / sum(claude_code_code_edit_tool_decision_total)", "refId": "A" } ],
+      "targets": [ { "expr": "sum(claude_code_code_edit_tool_decision_total{decision=\"accept\"}) / clamp_min(sum(claude_code_code_edit_tool_decision_total), 1)", "refId": "A" } ],
       "gridPos": { "h": 8, "w": 6, "x": 12, "y": 38 }
     },
     {
