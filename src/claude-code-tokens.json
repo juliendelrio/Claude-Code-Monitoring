@@ -7,27 +7,27 @@
   "panels": [
     { "id": 1, "type": "row", "title": "Vue d'ensemble", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 } },
     {
-      "id": 2, "type": "stat", "title": "Coût total (USD)",
+      "id": 2, "type": "stat", "title": "Coût sur la période (USD)",
       "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 2 } },
-      "targets": [ { "expr": "sum(claude_code_cost_usage_USD_total)", "refId": "A" } ],
+      "targets": [ { "expr": "sum(increase(claude_code_cost_usage_USD_total[$__range]))", "refId": "A" } ],
       "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 }
     },
     {
-      "id": 3, "type": "stat", "title": "Tokens totaux",
+      "id": 3, "type": "stat", "title": "Tokens sur la période",
       "fieldConfig": { "defaults": { "unit": "short" } },
-      "targets": [ { "expr": "sum(claude_code_token_usage_tokens_total)", "refId": "A" } ],
+      "targets": [ { "expr": "sum(increase(claude_code_token_usage_tokens_total[$__range]))", "refId": "A" } ],
       "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 }
     },
     {
-      "id": 4, "type": "stat", "title": "Sessions",
+      "id": 4, "type": "stat", "title": "Sessions sur la période",
       "fieldConfig": { "defaults": { "unit": "short" } },
-      "targets": [ { "expr": "sum(claude_code_session_count_total)", "refId": "A" } ],
+      "targets": [ { "expr": "sum(increase(claude_code_session_count_total[$__range]))", "refId": "A" } ],
       "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 }
     },
     {
-      "id": 5, "type": "stat", "title": "Temps actif (h)",
+      "id": 5, "type": "stat", "title": "Temps actif sur la période (h)",
       "fieldConfig": { "defaults": { "unit": "h", "decimals": 2 } },
-      "targets": [ { "expr": "sum(claude_code_active_time_seconds_total) / 3600", "refId": "A" } ],
+      "targets": [ { "expr": "sum(increase(claude_code_active_time_seconds_total[$__range])) / 3600", "refId": "A" } ],
       "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 }
     },
 
