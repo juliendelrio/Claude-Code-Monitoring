@@ -13,15 +13,10 @@ services:
       - ./otel-config.yaml:/etc/otelcol/config.yaml:ro
     restart: unless-stopped
     mem_limit: 512m
-    healthcheck:
-      # health_check extension exposed on :13133. The otel/opentelemetry-collector
-      # image bundles wget; if a future :latest turns fully distroless this check
-      # would need the contrib image or removal.
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:13133/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+    # No container healthcheck: the otel/opentelemetry-collector image is
+    # distroless (no shell, wget or curl), so an HTTP probe can't run inside it.
+    # The health_check extension still listens on :13133 for external probing
+    # (e.g. via Traefik) — see otel-config.yaml.
     networks:
       - default
       - web
